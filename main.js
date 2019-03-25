@@ -14,20 +14,18 @@ var stonePadding = 100;
 var stoneOffsetTop = 100;
 var stoneOffsetLeft = 100;
 
-// var players=[];
-
 var playerOneXposition;
 var playerOneYposition;
 var playerOneSpeedX;
-var playerOneSpeedY; //-9 , 0 , 9
+var playerOneSpeedY;
 
 var playerTwoXposition;
 var playerTwoYposition;
 var playerTwoSpeedX;
 var playerTwoSpeedY;
 
-var playerTwoX;
-var playerTwoY;
+var playerOneAlive = 1;
+var playerTwoAlive = 1;
 
 var bombPlayerOne = [];
 var bombPlayerTwo = [];
@@ -43,6 +41,37 @@ for(var c=0; c<stoneColumnCount; c++) {
     }
 }
 
+var boardRowCount = 9;
+var boardColumnCount = 9;
+var boardBlockWidth = 100;
+var boardBlockHeight = 100;
+
+var allBlocks = [[5, 5, 0, 0, 0, 0, 0, 0, 0],
+                 [5, 1, 0, 1, 0, 1, 0, 1, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 1, 0, 1, 0, 1, 0, 1, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 1, 0, 1, 0, 1, 0, 1, 0],
+                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                 [0, 1, 0, 1, 0, 1, 0, 1, 5],
+                 [0, 0, 0, 0, 0, 0, 0, 5, 5]];
+/*
+for(var c=0; c<boardColumnCount; c++) {
+        for(var r=0; r<boardRowCount; r++) {
+            if(stones[c][r].status == 1){
+            var stoneX = (c*(stoneWidth+stonePadding))+stoneOffsetLeft;
+            var stoneY = (r*(stoneHeight+stonePadding))+stoneOffsetTop;
+            stones[c][r].x = stoneX;
+            stones[c][r].y = stoneY;
+            ctx.beginPath();
+            ctx.rect(stoneX, stoneY, stoneWidth, stoneHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+                }
+            }
+         }
+*/
 class Game {
     constructor(gameWidth, gameHeight,gridWidth,gridHeight){
         this.gameWidth = gameWidth;
@@ -126,6 +155,8 @@ class Blocks {
     }
 
     draw(ctx) {
+
+
     for(var c=0; c<stoneColumnCount; c++) {
         for(var r=0; r<stoneRowCount; r++) {
             if(stones[c][r].status == 1){
@@ -189,14 +220,15 @@ class BomberMan {
     }
 
     draw(ctx) {
-
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-        ctx.linewidth = 3;
-        ctx.strokeStyle="red";
-        ctx.fillStyle = "green";
-        ctx.fill();
-        ctx.stroke();
+        if(playerOneAlive > 0){
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+            ctx.linewidth = 3;
+            ctx.strokeStyle="red";
+            ctx.fillStyle = "green";
+            ctx.fill();
+            ctx.stroke();
+        }
     }
 
     update(deltaTime) {
@@ -305,6 +337,7 @@ class BomberManTwo {
 
     draw(ctx) {
 
+        if(playerTwoAlive > 0){
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
         ctx.linewidth = 3;
@@ -312,6 +345,9 @@ class BomberManTwo {
         ctx.fillStyle = "red";
         ctx.fill();
         ctx.stroke();
+    } else{
+        console.log("Player Two ded");
+    }
     }
 
     update(deltaTime) {
@@ -371,6 +407,23 @@ class BomberManTwo {
         }
     }
 }
+checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
+var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr) { //i need this to run with requestframe.....
+    var currentXBombCoords;
+    var currentYBombCoords;
+
+    for(var i = 0; i < bombArr.length; i ++){
+        currentXBombCoords = bombArr[i].x_cornerCoords;
+        currentYBombCoords = bombArr[i].y_cornerCoords;
+        if((Math.ceil(playerXpos/100)*100 == currentXBombCoords)
+            && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
+            console.log("OTHER PLAYER HIT YOU")
+        }else {
+            return false;
+        }
+    }
+}
+
 
 class BombOne{
     constructor(game){
@@ -386,6 +439,7 @@ class BombOne{
 
         this.type = "bomb";
         this.owner = 1;
+        this.amount = 1;
 
         this.status = 0;
 
@@ -405,13 +459,20 @@ class BombOne{
             if(this.status == 0 ){
                 ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
-                console.log("bomb planted")
             }else if(this.status == 1){
+                if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) // checks if player is inside range of bomb
+                    && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))
+                    // ||
+                    // ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) //need to check with playertwoBomb.... but HOW??
+                    // && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))
+                     ) {
+                    console.log("In the Blast Range");
+                    playerOneAlive = 0;
+                }
                 ctx.fillStyle = "#CE594B";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
-                console.log("bomb denoted");
             }else if(this.status == 2){
-                console.log("bomb is no more");
+                bombPlayerOne.shift();
             }
     }
 
@@ -443,6 +504,7 @@ class BombTwo{
 
         this.type = "bomb";
         this.owner = 2;
+        this.amount = 1; //work in progress. Need to limit amount of bombs a character can place.
 
         this.status = 0;
 
@@ -457,41 +519,39 @@ class BombTwo{
         this.y_bomb = this.y_cornerCoords + 10;
     }
     draw(ctx){
-
+        if(this.amount !== 0){
             if(this.status == 0 ){
                 ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
-                console.log("bomb planted")
-                console.log("")
             }else if(this.status == 1){
+                    if((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords)
+                    && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)){ // checks if player is inside range of bomb
+                    console.log("In the Blast Range");
+                    playerTwoAlive = 0;
+                }
                 ctx.fillStyle = "#CE594B";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
-                console.log("bomb denoted");
             }else if(this.status == 2){
-                console.log("bomb is no more");
+                bombPlayerTwo.shift();
             }
+        }
     }
 
     update(deltaTime){
          // checks gametimer with detonation time to do something
-            let detonationTimer = 3; // status 0
+            let detonationTimer = 30; // status 0
             let timeToDet = this.timeCreated + detonationTimer; //status 0
             let timeOfExplode = timeToDet + 1.5; // change to status 1
             let timeToDisappear = timeOfExplode + 2;              // change to status 2
-
+            if(this.amount !== 0){
+                // console.log(this.amount);
             if(gameTimer > timeToDet && gameTimer < timeOfExplode){
-                this.status = 1;
-            } else if(gameTimer > timeOfExplode ){
-                this.status = 2;
+                    this.status = 1;
+                }else if(gameTimer > timeOfExplode ){
+                     this.status = 2;
+                }
             }
     }
-
-    explode(){
-
-    }
-
-
-
 }
 
 class InputHandler {
