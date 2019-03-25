@@ -43,52 +43,6 @@ for(var c=0; c<stoneColumnCount; c++) {
     }
 }
 
-addEventListener("click", function(){
-
-        explodingArr.push(new explode());
-
-        console.log("CLICK");
-});
-
-// var explosionLogic = function(){ //bombArr1, bombArr2
-
-//     var x0= 400;
-//     var y0 = 400;
-//     var x_1 = x0 + GRID_WIDTH;
-//     var x1_ = x0 - GRID_WIDTH;
-//     var y_1 = y0 + GRID_HEIGHT;
-//     var y1_ = y0 - GRID_HEIGHT;
-
-//         ctx.fillRect(x0, y0, GRID_WIDTH, GRID_HEIGHT); // same yx
-//         ctx.fillRect(x_1, y0, GRID_WIDTH, GRID_HEIGHT); // same y
-//         ctx.fillRect(x1_, y0, GRID_WIDTH, GRID_HEIGHT); // same y
-//         ctx.fillRect(x0, y_1, GRID_WIDTH, GRID_HEIGHT); // same x
-//         ctx.fillRect(x0, y1_, GRID_WIDTH, GRID_HEIGHT); // same x
-
-//         console.log("CLICK")
-
-// }
-
-// class explode {
-//     constructor(game){
-
-//     }
-//     draw(ctx){
-//         var x0= this.;
-//         var y0 = 400;
-//         var x_1 = x0 + GRID_WIDTH;
-//         var x1_ = x0 - GRID_WIDTH;
-//         var y_1 = y0 + GRID_HEIGHT;
-//         var y1_ = y0 - GRID_HEIGHT;
-
-//         ctx.fillRect(x0, y0, GRID_WIDTH, GRID_HEIGHT); // same yx
-//         ctx.fillRect(x_1, y0, GRID_WIDTH, GRID_HEIGHT); // same y
-//         ctx.fillRect(x1_, y0, GRID_WIDTH, GRID_HEIGHT); // same y
-//         ctx.fillRect(x0, y_1, GRID_WIDTH, GRID_HEIGHT); // same x
-//         ctx.fillRect(x0, y1_, GRID_WIDTH, GRID_HEIGHT); // same x
-//     }
-// }
-
 class Game {
     constructor(gameWidth, gameHeight,gridWidth,gridHeight){
         this.gameWidth = gameWidth;
@@ -449,11 +403,11 @@ class BombOne{
     draw(ctx){
 
             if(this.status == 0 ){
-                ctx.fillStyle = "#E57927";
+                ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
                 console.log("bomb planted")
             }else if(this.status == 1){
-                ctx.fillStyle = "#55A8DF";
+                ctx.fillStyle = "#CE594B";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
                 console.log("bomb denoted");
             }else if(this.status == 2){
@@ -505,39 +459,17 @@ class BombTwo{
     draw(ctx){
 
             if(this.status == 0 ){
-                ctx.fillStyle = "#E57927";
+                ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
                 console.log("bomb planted")
+                console.log("")
             }else if(this.status == 1){
-                ctx.fillStyle = "#55A8DF";
+                ctx.fillStyle = "#CE594B";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
                 console.log("bomb denoted");
             }else if(this.status == 2){
                 console.log("bomb is no more");
             }
-            // } else if( this.status == 1){
-            //     ctx.fillStyle = "#FAFAFA"
-            //     ctx.fillRect(400, 400, this.width, this.height);
-            // } else if(this.status == 2){
-
-            // }
-
-                // let detonationTimer = 3;
-                // let timeToDet = this.timeCreated + detonationTimer;
-                // let timeOfExplode = timeToDet +1.5;
-                // console.log(timeToDet);
-                // console.log(timeOfExplode);
-                // if(timeToDet == gameTimer){
-                //     alert("okay");
-                // }
-                // if(timeToDet == gameTimer && gameTimer < timeOfExplode){
-                //     // && timeOfExplode <= gameTimer
-                //     console.log("paint");
-                //     ctx.fillStyle = "#FAFAFA"
-                //     ctx.fillRect(400, 400, this.width, this.height);
-                //     console.log("painted?");
-                // }
-
     }
 
     update(deltaTime){
@@ -547,32 +479,11 @@ class BombTwo{
             let timeOfExplode = timeToDet + 1.5; // change to status 1
             let timeToDisappear = timeOfExplode + 2;              // change to status 2
 
-            // console.log("time to det: " + timeToDet);
-            // console.log("Time of explode: " + timeOfExplode);
-            // console.log("Time when Disappear: " + timeToDisappear);
-            // console.log("Game Timer: " + gameTimer);
-
             if(gameTimer > timeToDet && gameTimer < timeOfExplode){
                 this.status = 1;
-                // console.log("changed to 1 "); // when
             } else if(gameTimer > timeOfExplode ){
                 this.status = 2;
-                // console.log("changed to 2 ");
             }
-
-/*
-
-            Game Timer: 14.766666666666667
-            created at time 2.25 - 0
-            time to det: 5.25 (after this time status 1)
-            Time of explode: 6.75 (after this time status 2 )
-            Time when timeToDisappear: 8.75
-            Game Timer: 14.783333333333333
-            time to det: 5.25
-            Time of explode: 6.75
-
-*/
-
     }
 
     explode(){
@@ -606,10 +517,6 @@ class InputHandler {
                 case 32:
                     bombPlayerOne.push(new BombOne());
                     break;
-
-    //                 addEventListener('click',function(){
-    // bombPlayerOne.push(new Bomb());
-    // bomb = new Bomb();
             }
         });
         document.addEventListener('keyup',event => {
@@ -697,11 +604,6 @@ let lastTime = 0;
 let i = 0;
 function updateGameBoard(timestamp) {
     let deltaTime = timestamp - lastTime;
-    // gameTimer = timestamp;
-    // console.log(deltaTime);
-
-    // console.log(timestamp);
-
     lastTime = timestamp;
 
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
@@ -711,7 +613,6 @@ function updateGameBoard(timestamp) {
     i++;
     counter = i/60;
     gameTimer = counter;
-
 
     requestAnimationFrame(updateGameBoard);
 }
