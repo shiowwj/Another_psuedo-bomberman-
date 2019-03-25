@@ -1,5 +1,3 @@
-s
-
 let canvas = document.getElementById('gameScreen');
 let ctx = canvas.getContext('2d');
 
@@ -34,6 +32,8 @@ var playerTwoY;
 var bombPlayerOne = [];
 var bombPlayerTwo = [];
 var explodingArr =[];
+
+let gameTimer;
 
 var stones = [];
 for(var c=0; c<stoneColumnCount; c++) {
@@ -467,13 +467,9 @@ class BombTwo{
         this.width = 80;
         this.height = 80;
 
-        // this.speedOfPlayer ={
-        //     xSpeed:
-        // };
+        this.timeCreated = gameTimer;
 
         this.instance = 0;
-        this.frameRate = (1/60);
-        this.frames = 1;
 
         this.type = "bomb";
         this.owner = 2;
@@ -497,6 +493,7 @@ class BombTwo{
 
             // if(this.position.x < this.gridWidth){
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                // console.log(this.timeCreated);
             // } else {
                 // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height);
             // }
@@ -504,12 +501,18 @@ class BombTwo{
     }
 
     update(deltaTime){
+        console.log("planted");
+        let detonationTimer = 3;
+        let timeToStuff = this.timeCreated + detonationTimer;
+        console.log(timeToStuff);
+        console.log(gameTimer);
+        if(timeToStuff === gameTimer){
+            alert("HELLO");
+        }
+        // if(timeCreated + )
 
-        this.frames += this.frames
-        this.frameRate = this.frames * this.frameRate;
-        let counter = this.frameRate;
-        console.log(this.frameRate);
-        console.log(counter);
+
+
     }
 
 
@@ -626,14 +629,24 @@ let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT,playerOneXposi
 game.start();
 
 let lastTime = 0;
+let i = 0;
 function updateGameBoard(timestamp) {
     let deltaTime = timestamp - lastTime;
+    // gameTimer = timestamp;
+    // console.log(deltaTime);
+
+    // console.log(timestamp);
+
     lastTime = timestamp;
 
     ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
     game.update(deltaTime);
     game.draw(ctx);
+    i++;
+    counter = i/60;
+    gameTimer = counter;
+
 
     requestAnimationFrame(updateGameBoard);
 }
