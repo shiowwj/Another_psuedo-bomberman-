@@ -1,6 +1,5 @@
-// import Game from "/game";
+s
 
-//Wei Jun's version for main js folder
 let canvas = document.getElementById('gameScreen');
 let ctx = canvas.getContext('2d');
 
@@ -17,6 +16,24 @@ var stonePadding = 100;
 var stoneOffsetTop = 100;
 var stoneOffsetLeft = 100;
 
+// var players=[];
+
+var playerOneXposition;
+var playerOneYposition;
+var playerOneSpeedX;
+var playerOneSpeedY; //-9 , 0 , 9
+
+var playerTwoXposition;
+var playerTwoYposition;
+var playerTwoSpeedX;
+var playerTwoSpeedY;
+
+var playerTwoX;
+var playerTwoY;
+
+var bombPlayerOne = [];
+var bombPlayerTwo = [];
+var explodingArr =[];
 
 var stones = [];
 for(var c=0; c<stoneColumnCount; c++) {
@@ -25,6 +42,52 @@ for(var c=0; c<stoneColumnCount; c++) {
         stones[c][r] = { x: 0, y: 0, status: 1};
     }
 }
+
+addEventListener("click", function(){
+
+        explodingArr.push(new explode());
+
+        console.log("CLICK");
+});
+
+// var explosionLogic = function(){ //bombArr1, bombArr2
+
+//     var x0= 400;
+//     var y0 = 400;
+//     var x_1 = x0 + GRID_WIDTH;
+//     var x1_ = x0 - GRID_WIDTH;
+//     var y_1 = y0 + GRID_HEIGHT;
+//     var y1_ = y0 - GRID_HEIGHT;
+
+//         ctx.fillRect(x0, y0, GRID_WIDTH, GRID_HEIGHT); // same yx
+//         ctx.fillRect(x_1, y0, GRID_WIDTH, GRID_HEIGHT); // same y
+//         ctx.fillRect(x1_, y0, GRID_WIDTH, GRID_HEIGHT); // same y
+//         ctx.fillRect(x0, y_1, GRID_WIDTH, GRID_HEIGHT); // same x
+//         ctx.fillRect(x0, y1_, GRID_WIDTH, GRID_HEIGHT); // same x
+
+//         console.log("CLICK")
+
+// }
+
+// class explode {
+//     constructor(game){
+
+//     }
+//     draw(ctx){
+//         var x0= this.;
+//         var y0 = 400;
+//         var x_1 = x0 + GRID_WIDTH;
+//         var x1_ = x0 - GRID_WIDTH;
+//         var y_1 = y0 + GRID_HEIGHT;
+//         var y1_ = y0 - GRID_HEIGHT;
+
+//         ctx.fillRect(x0, y0, GRID_WIDTH, GRID_HEIGHT); // same yx
+//         ctx.fillRect(x_1, y0, GRID_WIDTH, GRID_HEIGHT); // same y
+//         ctx.fillRect(x1_, y0, GRID_WIDTH, GRID_HEIGHT); // same y
+//         ctx.fillRect(x0, y_1, GRID_WIDTH, GRID_HEIGHT); // same x
+//         ctx.fillRect(x0, y1_, GRID_WIDTH, GRID_HEIGHT); // same x
+//     }
+// }
 
 class Game {
     constructor(gameWidth, gameHeight,gridWidth,gridHeight){
@@ -35,6 +98,7 @@ class Game {
     }
 
     start() {
+
         this.board = new Background(this);
         this.stoneBlock = new Blocks(this);
         this.playerOne = new BomberMan(this);
@@ -46,6 +110,7 @@ class Game {
 
         new InputHandler(this.playerOne);
         new InputHandlerTwo(this.playerTwo);
+
     }
 
     update(deltaTime) {
@@ -53,11 +118,25 @@ class Game {
         this.playerOne.update(deltaTime);
         this.playerTwo.update(deltaTime);
 
+        if(bombPlayerTwo.length>0){
+            bombPlayerTwo.forEach(object => object.update(deltaTime));
+        }
+
     }
 
     draw(ctx) {
 
         this.gameObjects.forEach(object => object.draw(ctx));
+
+        if(bombPlayerOne.length > 0){
+            bombPlayerOne.forEach(object => object.draw(ctx));
+        }
+        if(bombPlayerTwo.length >0){
+            bombPlayerTwo.forEach(object => object.draw(ctx));
+        }
+        // if(explodingArr.length > 0){
+        //     explodingArr.forEach(object => object.draw(ctx));
+        // }
 
     }
 }
@@ -76,15 +155,6 @@ class Background {
 
 class Blocks {
     constructor(game){
-
-        // this.top =
-        // this.right =
-        // this.bottom =
-        // this.left =
-        // let topOfBlock = this.game.stoneBlock.position.y;
-        // let rightOfBlock = this.game.stoneBlock.position.x + this.game.stoneBlock.position.gameWidth;
-        // let bottomOfBlock = this.game.stoneBlock.position.y + this.game.stoneBlock.position.gameHeight;
-        // let leftOfBlock = this.game.stoneBlock.position.x;
 
         this.width = game.gridWidth; // size of block
         this.height= game.gridHeight;
@@ -118,10 +188,10 @@ class Blocks {
 
 class BomberMan {
     constructor(game){
-        this.gameWidth = game.gameWidth;
-        this.gameHeight = game.gameHeight;
-        this.gridWidth = game.gridWidth;
-        this.gridHeight = game.gridHeight;
+        this.gameWidth = GAME_WIDTH;
+        this.gameHeight = GAME_HEIGHT;
+        this.gridWidth = GRID_WIDTH;
+        this.gridHeight = GRID_HEIGHT;
         this.radius = 25;
 
         this.maxSpeedX = 9;
@@ -135,6 +205,8 @@ class BomberMan {
             x : this.gridWidth/2,
             y : this.gridHeight/2
         }
+
+        this.statusAlive = true;
     }
 
     moveLeft(){
@@ -170,9 +242,17 @@ class BomberMan {
     }
 
     update(deltaTime) {
-            // console.log(this.game.playerOne.position.x);
+
+            playerOneXposition = this.game.playerOne.position.x;
+            playerOneYposition = this.game.playerOne.position.y;
+
+            // console.log("Player 1, " + "x-coord: " + playerOneXposition +"," +"y-coord: "+ playerOneYposition);
+
             this.position.x += this.speedX;
             this.position.y += this.speedY;
+
+            playerOneSpeedX = this.speedX;
+            playerOneSpeedY = this.speedY;
 
     //checks if bomberman on left or right wall
         if(this.position.x < this.radius){
@@ -224,10 +304,10 @@ class BomberMan {
 
 class BomberManTwo {
     constructor(game){
-        this.gameWidth = game.gameWidth;
-        this.gameHeight = game.gameHeight;
-        this.gridWidth = game.gridWidth;
-        this.gridHeight = game.gridHeight;
+        this.gameWidth = GAME_WIDTH;
+        this.gameHeight = GAME_HEIGHT;
+        this.gridWidth = GRID_WIDTH;
+        this.gridHeight = GRID_HEIGHT;
         this.radius = 25;
 
         this.maxSpeedX = 9;
@@ -241,6 +321,7 @@ class BomberManTwo {
             x : this.gameWidth - this.gridWidth/2,
             y : this.gameHeight - this.gridHeight/2
         }
+        this.statusAlive = true;
     }
 
     moveLeft(){
@@ -276,10 +357,15 @@ class BomberManTwo {
     }
 
     update(deltaTime) {
-            // console.log(this.game.playerOne.position.x);
+
+            playerTwoXposition = this.game.playerTwo.position.x;
+            playerTwoYposition = this.game.playerTwo.position.y;
+            // console.log("Player 2, " + "x-coord: " + this.game.playerTwo.position.x +"," +"y-coord: "+ this.game.playerTwo.position.y);
             this.position.x += this.speedX;
             this.position.y += this.speedY;
 
+            playerTwoSpeedX = this.speedX;
+            playerTwoSpeedY = this.speedY;
     //checks if bomberman on left or right wall
         if(this.position.x < this.radius){
             this.position.x =this.radius;
@@ -328,6 +414,107 @@ class BomberManTwo {
     }
 }
 
+class BombOne{
+    constructor(game){
+
+        this.gridWidth = GRID_WIDTH;
+        this.gridHeight = GRID_HEIGHT;
+        this.width = 80;
+        this.height = 80;
+
+        // this.speedOfPlayer ={
+        //     xSpeed:
+        // };
+
+        this.instance = 0;
+
+        this.type = "bomb";
+
+        this.position = {
+            x: playerOneXposition,
+            y: playerOneYposition
+        };
+
+        this.x_cornerCoords = Math.ceil(this.position.x/100)*100;
+        this.y_cornerCoords = (Math.ceil(this.position.y/100)*100)-100;
+        this.x_bomb = this.x_cornerCoords +10;
+        this.y_bomb = this.y_cornerCoords + 10;
+    }
+
+    // drop(ctx,xposition,yposition){
+    //     return draw(ctx,xposition,yposition)
+    // }
+
+    draw(ctx){
+
+        // if(this.position.x < this.gridWidth){
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+            // } else {
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height);
+            // }
+    }
+
+    update(deltaTime){
+
+    }
+}
+
+class BombTwo{
+    constructor(game){
+
+        this.gridWidth = GRID_WIDTH;
+        this.gridHeight = GRID_HEIGHT;
+        this.width = 80;
+        this.height = 80;
+
+        // this.speedOfPlayer ={
+        //     xSpeed:
+        // };
+
+        this.instance = 0;
+        this.frameRate = (1/60);
+        this.frames = 1;
+
+        this.type = "bomb";
+        this.owner = 2;
+
+        this.position = {
+            x: playerTwoXposition,
+            y: playerTwoYposition
+        };
+
+        this.x_cornerCoords = Math.ceil(this.position.x/100)*100;
+        this.y_cornerCoords = (Math.ceil(this.position.y/100)*100)-100;
+        this.x_bomb = this.x_cornerCoords +10;
+        this.y_bomb = this.y_cornerCoords + 10;
+    }
+
+    // drop(ctx,xposition,yposition){
+    //     return draw(ctx,xposition,yposition)
+    // }
+
+    draw(ctx){
+
+            // if(this.position.x < this.gridWidth){
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+            // } else {
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height);
+            // }
+
+    }
+
+    update(deltaTime){
+
+        this.frames += this.frames
+        this.frameRate = this.frames * this.frameRate;
+        let counter = this.frameRate;
+        console.log(this.frameRate);
+        console.log(counter);
+    }
+
+
+}
+
 class InputHandler {
     constructor(playerOne) {
         document.addEventListener('keydown',event => {
@@ -348,6 +535,13 @@ class InputHandler {
                     playerOne.moveDown();
                     break;
 
+                case 32:
+                    bombPlayerOne.push(new BombOne());
+                    break;
+
+    //                 addEventListener('click',function(){
+    // bombPlayerOne.push(new Bomb());
+    // bomb = new Bomb();
             }
         });
         document.addEventListener('keyup',event => {
@@ -396,6 +590,10 @@ class InputHandlerTwo {
                     playerTwo.moveDown();
                     break;
 
+                case 77:
+                    bombPlayerTwo.push(new BombTwo());
+                    break;
+
             }
         });
         document.addEventListener('keyup',event => {
@@ -424,7 +622,7 @@ class InputHandlerTwo {
     }
 }
 
-let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT);
+let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT,playerOneXposition,playerOneYposition);
 game.start();
 
 let lastTime = 0;
