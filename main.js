@@ -24,8 +24,11 @@ var playerTwoYposition;
 var playerTwoSpeedX;
 var playerTwoSpeedY;
 
+var players = [];
 var playerOneAlive = 1;
 var playerTwoAlive = 1;
+var checkOne = 1;
+var checkTwo = 1;
 
 var bombPlayerOne = [];
 var bombPlayerTwo = [];
@@ -86,10 +89,16 @@ class Game {
         this.stoneBlock = new Blocks(this);
         this.playerOne = new BomberMan(this);
         this.playerTwo = new BomberManTwo(this);
+                // for (var i = 0 ; i < 1; i++){
+                // players.push(new BombMan());
+                // }
+
 
         this.gameObjects = [
             this.board, this.stoneBlock, this.playerOne, this.playerTwo
+            //
         ];
+
 
         new InputHandler(this.playerOne);
         new InputHandlerTwo(this.playerTwo);
@@ -195,6 +204,11 @@ class BomberMan {
             y : this.gridHeight/2
         }
 
+        this.positionTwo = {
+            x : this.gameWidth - this.gridWidth/2,
+            y : this.gameHeight - this.gridHeight/2
+        }
+
         this.statusAlive = true;
     }
 
@@ -220,7 +234,8 @@ class BomberMan {
     }
 
     draw(ctx) {
-        if(playerOneAlive > 0){
+
+        if(playerOneAlive > 0 && checkOne > 0){ //if this statement both true then will show player 1
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
             ctx.linewidth = 3;
@@ -228,6 +243,8 @@ class BomberMan {
             ctx.fillStyle = "green";
             ctx.fill();
             ctx.stroke();
+        } else {
+            console.log("Player One ded");
         }
     }
 
@@ -407,23 +424,59 @@ class BomberManTwo {
         }
     }
 }
-checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
-var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr) { //i need this to run with requestframe.....
+
+//problem: when the other play(2) adds the bomb. player(1) is removed from game board.
+
+// checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
+var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr,playerID) { //i need this to run with requestframe.....
     var currentXBombCoords;
     var currentYBombCoords;
+    var player =[];
+    var check;
 
-    for(var i = 0; i < bombArr.length; i ++){
-        currentXBombCoords = bombArr[i].x_cornerCoords;
-        currentYBombCoords = bombArr[i].y_cornerCoords;
-        if((Math.ceil(playerXpos/100)*100 == currentXBombCoords)
-            && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
-            console.log("OTHER PLAYER HIT YOU")
-        }else {
-            return false;
-        }
+    if(playerID == 1){
+        check = checkOne;
+    } else if(playerID ==2){
+        check = checkTwo;
     }
+
+    if(bombArr.length == 0){
+    // from this i can know what is the bomb coords the player is on. I can set if affected or not. (i still don't know in game time.... if I am stepping OVER IT.)
+        console.log("NO bombs LAID")
+        console.log(check);
+        return check;
+    } else if( bombArr.length > 0){
+             for(var i = 0; i < bombArr.length; i ++){
+                currentXBombCoords = bombArr[i].x_cornerCoords;
+                currentYBombCoords = bombArr[i].y_cornerCoords;
+                    if((Math.ceil(playerXpos/100)*100 == currentXBombCoords) // checks if player is on ANY of the BOMB position
+                    && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
+                        // if()
+                            console.log("This bomb is the " + i + "item on the bomb arr."); // this tell me which bomb is on the player . Able to retrieve coordinates
+                            console.log("X coord of BOMB that hits: " + bombArr[i].x_cornerCoords);
+                            console.log("Y coord of BOMB that hits: " + bombArr[i].y_cornerCoords);
+                            console.log("OTHER PLAYER HIT YOU")
+                            check = 0;
+                            if(playerID == 1){
+                                checkOne = check;
+                            } else if(playerID ==2){
+                                checkTwo = check;
+                            }
+                        return check;
+                    }else {
+                            console.log("No")
+                            console.log("No affected by these...: " + i);
+                            console.log(check);
+                        return check;
+                    }
+                }
+            }
 }
 
+var checkXcoord = function(playerXpos,playerYpos,bombArr){
+    var Xcoord;
+
+}
 
 class BombOne{
     constructor(game){
@@ -462,9 +515,8 @@ class BombOne{
             }else if(this.status == 1){
                 if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) // checks if player is inside range of bomb
                     && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))
-                    // ||
                     // ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) //need to check with playertwoBomb.... but HOW??
-                    // && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))
+                    // && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //
                      ) {
                     console.log("In the Blast Range");
                     playerOneAlive = 0;
@@ -525,8 +577,10 @@ class BombTwo{
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                     if((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords)
-                    && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)){ // checks if player is inside range of bomb
+                    && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)
+                    && checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo,1) > 0) { // checks if player is inside range of it's own bomb range
                     console.log("In the Blast Range");
+
                     playerTwoAlive = 0;
                 }
                 ctx.fillStyle = "#CE594B";
@@ -539,10 +593,10 @@ class BombTwo{
 
     update(deltaTime){
          // checks gametimer with detonation time to do something
-            let detonationTimer = 30; // status 0
+            let detonationTimer = 3; // status 0 (base 3s)
             let timeToDet = this.timeCreated + detonationTimer; //status 0
-            let timeOfExplode = timeToDet + 1.5; // change to status 1
-            let timeToDisappear = timeOfExplode + 2;              // change to status 2
+            let timeOfExplode = timeToDet + 1.5; // change to status 1 (base , 1.5s)
+            let timeToDisappear = timeOfExplode + 2;              // change to status 2  .... this line.. really has no use....
             if(this.amount !== 0){
                 // console.log(this.amount);
             if(gameTimer > timeToDet && gameTimer < timeOfExplode){
@@ -661,7 +715,7 @@ let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT,playerOneXposi
 game.start();
 
 let lastTime = 0;
-let i = 0;
+let frame = 0;
 function updateGameBoard(timestamp) {
     let deltaTime = timestamp - lastTime;
     lastTime = timestamp;
@@ -670,8 +724,8 @@ function updateGameBoard(timestamp) {
 
     game.update(deltaTime);
     game.draw(ctx);
-    i++;
-    counter = i/60;
+    frame++;
+    counter = frame/60;
     gameTimer = counter;
 
     requestAnimationFrame(updateGameBoard);
