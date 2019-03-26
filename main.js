@@ -234,8 +234,9 @@ class BomberMan {
     }
 
     draw(ctx) {
-
-        if(playerOneAlive > 0 && checkOne > 0){ //if this statement both true then will show player 1
+         // && checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo,1) > 0
+          // && checkOne > 0
+        if(playerOneAlive > 0){ //if this statement both true then will show player 1
             ctx.beginPath();
             ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
             ctx.linewidth = 3;
@@ -425,59 +426,6 @@ class BomberManTwo {
     }
 }
 
-//problem: when the other play(2) adds the bomb. player(1) is removed from game board.
-
-// checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
-var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr,playerID) { //i need this to run with requestframe.....
-    var currentXBombCoords;
-    var currentYBombCoords;
-    var player =[];
-    var check;
-
-    if(playerID == 1){
-        check = checkOne;
-    } else if(playerID ==2){
-        check = checkTwo;
-    }
-
-    if(bombArr.length == 0){
-    // from this i can know what is the bomb coords the player is on. I can set if affected or not. (i still don't know in game time.... if I am stepping OVER IT.)
-        console.log("NO bombs LAID")
-        console.log(check);
-        return check;
-    } else if( bombArr.length > 0){
-             for(var i = 0; i < bombArr.length; i ++){
-                currentXBombCoords = bombArr[i].x_cornerCoords;
-                currentYBombCoords = bombArr[i].y_cornerCoords;
-                    if((Math.ceil(playerXpos/100)*100 == currentXBombCoords) // checks if player is on ANY of the BOMB position
-                    && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
-                        // if()
-                            console.log("This bomb is the " + i + "item on the bomb arr."); // this tell me which bomb is on the player . Able to retrieve coordinates
-                            console.log("X coord of BOMB that hits: " + bombArr[i].x_cornerCoords);
-                            console.log("Y coord of BOMB that hits: " + bombArr[i].y_cornerCoords);
-                            console.log("OTHER PLAYER HIT YOU")
-                            check = 0;
-                            if(playerID == 1){
-                                checkOne = check;
-                            } else if(playerID ==2){
-                                checkTwo = check;
-                            }
-                        return check;
-                    }else {
-                            console.log("No")
-                            console.log("No affected by these...: " + i);
-                            console.log(check);
-                        return check;
-                    }
-                }
-            }
-}
-
-var checkXcoord = function(playerXpos,playerYpos,bombArr){
-    var Xcoord;
-
-}
-
 class BombOne{
     constructor(game){
 
@@ -508,21 +456,48 @@ class BombOne{
     }
 
     draw(ctx){
-
             if(this.status == 0 ){
                 ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
-                if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) // checks if player is inside range of bomb
-                    && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))
-                    // ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) //need to check with playertwoBomb.... but HOW??
-                    // && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //
+                if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords + 100)) // bottom
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords - 100) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //left
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords + 100) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //right
                      ) {
                     console.log("In the Blast Range");
                     playerOneAlive = 0;
                 }
                 ctx.fillStyle = "#CE594B";
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+            }else if(this.status == 2){
+                bombPlayerOne.shift();
+            }
+
+            if(this.status == 0 ){
+                ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+            }else if(this.status == 1){
+                if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords + 100)) // bottom
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords - 100) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)) //left
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords + 100) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)) //right
+                     ) {
+                    console.log("In the Blast Range");
+                    playerTwoAlive = 0;
+                }
+                ctx.fillStyle = "#CE594B";
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
@@ -570,21 +545,55 @@ class BombTwo{
         this.x_bomb = this.x_cornerCoords +10;
         this.y_bomb = this.y_cornerCoords + 10;
     }
+
     draw(ctx){
         if(this.amount !== 0){
             if(this.status == 0 ){
                 ctx.fillStyle = "#262626";
                 ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
-                    if((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords)
-                    && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)
-                    && checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo,1) > 0) { // checks if player is inside range of it's own bomb range
+                    if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords + 100)) // bottom
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords - 100) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //left
+                    ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords + 100) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords)) //right
+                     ){ // checks if player is inside range of it's own bomb range
+                    console.log("In the Blast Range");
+
+                    playerOneAlive = 0;
+                }
+                ctx.fillStyle = "#CE594B";
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+            }else if(this.status == 2){
+                bombPlayerTwo.shift();
+            }
+        }
+
+        if(this.amount !== 0){
+            if(this.status == 0 ){
+                ctx.fillStyle = "#262626";
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+            }else if(this.status == 1){
+                    if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords + 100)) // bottom
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords - 100) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)) //left
+                    ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords + 100) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords)) //right
+                     ){ // checks if player is inside range of it's own bomb range
                     console.log("In the Blast Range");
 
                     playerTwoAlive = 0;
                 }
                 ctx.fillStyle = "#CE594B";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerTwo.shift();
             }
@@ -732,3 +741,59 @@ function updateGameBoard(timestamp) {
 }
 
 requestAnimationFrame(updateGameBoard);
+
+
+/*
+    //problem: when the other play(2) adds the bomb. player(1) is removed from game board.
+
+    // checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
+    // var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr,playerID) { //i need this to run with requestframe.....
+    //     var currentXBombCoords;
+    //     var currentYBombCoords;
+    //     var player =[];
+    //     var check;
+
+    //     if(playerID == 1){
+    //         check = checkOne;
+    //     } else if(playerID ==2){
+    //         check = checkTwo;
+    //     }
+
+    //     if(bombArr.length == 0){
+    //     // from this i can know what is the bomb coords the player is on. I can set if affected or not. (i still don't know in game time.... if I am stepping OVER IT.)
+    //         console.log("NO bombs LAID")
+    //         console.log(check);
+    //         return check;
+    //     } else if( bombArr.length > 0){
+    //              for(var i = 0; i < bombArr.length; i ++){
+    //                 currentXBombCoords = bombArr[i].x_cornerCoords;
+    //                 currentYBombCoords = bombArr[i].y_cornerCoords;
+    //                     if((Math.ceil(playerXpos/100)*100 == currentXBombCoords) // checks if player is on ANY of the BOMB position
+    //                     && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
+    //                         // if()
+    //                             console.log("This bomb is the " + i + "item on the bomb arr."); // this tell me which bomb is on the player . Able to retrieve coordinates
+    //                             console.log("X coord of BOMB that hits: " + bombArr[i].x_cornerCoords);
+    //                             console.log("Y coord of BOMB that hits: " + bombArr[i].y_cornerCoords);
+    //                             console.log("OTHER PLAYER HIT YOU")
+    //                             check = 0;
+    //                             if(playerID == 1){
+    //                                 checkOne = check;
+    //                             } else if(playerID ==2){
+    //                                 checkTwo = check;
+    //                             }
+    //                         return check;
+    //                     }else {
+    //                             console.log("No")
+    //                             console.log("No affected by these...: " + i);
+    //                             console.log(check);
+    //                         return check;
+    //                     }
+    //                 }
+    //             }
+    // }
+
+    // var checkXcoord = function(playerXpos,playerYpos,bombArr){
+    //     var Xcoord;
+
+    // }
+*/
