@@ -17,7 +17,21 @@ The MVP of this project (as of 23th March 2019) is condensed into *** parts:
 4. Players able to react to bomb explosion (i.e removal of player character from board)
 
 
+Update (as of 26th March 2019):
+1. Hardcoded bomb explosion logic. Players will be removed from gameboard if caught in explosion animation(red).
+To implement:
+1. Bomb collision logic. Players will not be able to cross bomb blocks
+2. Image/Gif for representing players 
+3. Audio for a) background, b) game start, c) bomb placed, d) explosion, e)player removed(ded), f)game end
+4. Game Start display, Game end Display 
+5. Game instructions display (next to canvas)
+
+Future considerations:
+1. Destructable blocks
+2. Single player 
+
 Update (as of 25th March 2019):
 1. Explosion mechanics and logic is still in development
 2. Randomly placed Destructible blocks around Game Board
 3. Start Game Page, Game-Over Page
+
