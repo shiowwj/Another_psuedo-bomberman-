@@ -122,7 +122,11 @@ section{
 }
 
 #first-page-bar{
+	color: black;
+}
 
+#second-page-bar{
+	color: black;
 }
 
 #score-text {

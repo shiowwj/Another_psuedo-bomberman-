@@ -1,6 +1,6 @@
 let canvas = document.getElementById('gameScreen');
 let ctx = canvas.getContext('2d');
-var gameStatus = document.getElementById("score-text");
+var gameStatusOne = document.getElementById("score-text");
 var playerOneBombCount = document.getElementById("bombOne-text");
 var playerTwoBombCount = document.getElementById("bombTwo-text");
 var gameTimerCount = document.getElementById("gameTimer-text");
@@ -685,7 +685,7 @@ class InputHandler {
                 case 67:
                     bombPlayerOne.push(new BombOne());
                     playerOneBombsUsed++;
-                    gameStatus.innerText = "Player One placed Bomb."
+                    // gameStatus.innerText = "Player One placed Bomb."
                     playerOneBombCount.innerText = "Player One\ Bomb Count: " + playerOneBombsUsed;
                     break;
             }
@@ -739,7 +739,7 @@ class InputHandlerTwo {
                 case 220:
                     bombPlayerTwo.push(new BombTwo());
                     playerTwoBombsUsed++;
-                    gameStatus.innerText = "Player Two placed Bomb."
+                    // gameStatus.innerText = "Player Two placed Bomb."
                     playerTwoBombCount.innerText = "Player Two\ Bomb Count: " + playerTwoBombsUsed;
                     break;
             }
@@ -791,16 +791,16 @@ var updateGameBoard =function(timestamp) {
     counter = frame/60;
     gameTimer = counter;
 
-    gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____  wasted."
+    // gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____  wasted."
 
     if(playerOneAlive == 0 && playerTwoAlive == 0){
-        gameStatus.innerText = "Both Players are Dead."
+        gameStatusOne.innerText = "Both Players are Dead."
         console.log("Both Players are Dead.");
     } else if(playerOneAlive == 0){
-        gameStatus.innerText = "Player One is Dead."
+        gameStatusOne.innerText = "Player One is Dead."
         console.log("Player One is Dead.");
     } else if(playerTwoAlive == 0){
-       gameStatus.innerText = "Player Two is Dead."
+       gameStatusOne.innerText = "Player Two is Dead."
         console.log("Player Two is Dead.");
     }
 }
@@ -816,7 +816,7 @@ var runGameCheck = function(){
         requestAnimationFrame(updateGameBoard);
     }
 }
-var gameStatus = document.getElementById("score-text");
+
 
 ////////DOM STUFF
 var restartGame = function(){
