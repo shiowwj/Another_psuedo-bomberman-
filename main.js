@@ -791,7 +791,7 @@ var updateGameBoard =function(timestamp) {
     counter = frame/60;
     gameTimer = counter;
 
-    gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____ wasted."
+    gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____  wasted."
 
     if(playerOneAlive == 0 && playerTwoAlive == 0){
         gameStatus.innerText = "Both Players are Dead."
