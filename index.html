@@ -3,29 +3,65 @@
 <head>
     <title>Stuff Project: 1</title>
     <meta charset="UTF-8" />
-    <style>
-        body{
-            text-align: center;
-            background-color: silver;
-        }
-        canvas{
-            border:1px solid black;
-            position: relative;
-        }
-        img {
-            display: none;
-        }
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+   <link rel="stylesheet" href="style.css">
 
-    </style>
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
-
-    <!-- script src="jcanvas.min.js"></script> -->
 </head>
 <body>
-        <img id="playerOneImg" src="img/playerOne.jpg">
-        <canvas id="gameScreen" width="900" height="900"> <!-- //one block is 100px -->
-        </canvas>
-        <script src="main.js"></script>
-
+    <div class="main-container">
+        <section class="child" id="first_page">
+            <div id="page-title">
+                <header>ANOTHER PIXEL MOVING GAME</header>
+            </div>
+            <div id="space-bar-prompt-1">
+                <footer id="first-page-bar">Press Space <!-- or Click here --> to Continue</footer>
+            </div>
+        </section>
+        <section class="child" id="second_page">
+            <div id="page-title">
+                <header>Game Instructions</header>
+            </div>
+            <div class="container" id="instructions">
+                <h1>Remove your opponent on the gamebaord by placing bombs.<br>Bombs go off in 3 seconds.<br>Standing in the blast zones will result in death. <br>Bombs Go Off after 3 SECONDS.</h1>
+                <div class="col-container">
+                    <h2>Player One (Top Left Corner):</h2>
+                    <p>‘W’ - up,<br>’S’ - down,<br>‘A’ - left,<br>‘D’ - right,<br>’Spacebar’ - drop bomb</p>
+                </div>
+                <div class="col-container">
+                    <h2>Player Two (Bottom Right Corner):</h2>
+                    <p>‘I ’ - up,<br>’’K’ - down,<br>‘J’ - left,<br>‘L’ - right,<br>’\ / | ’ - drop bomb (key next to square brackets) </p>
+                </div>
+            </div>
+            <div id="space-bar-prompt-2">
+                <footer id="second-page-bar">Press Space to Continue</footer>
+            </div>
+        </section>
+        <section class="child" id="third_page">
+            <div class="game-score-board">
+                <h2 id="score-text">U did What?</h2>
+            </div>
+            <div class="container_canvas">
+                <canvas id="gameScreen" width="900" height="900"> </canvas>
+            </div>
+                <button href="#" class="restartGame" onclick="restartGame()">Restart Game</button>
+                <button href="#fourth_page" class="toTheStats" onclick="">View Game Stats</button> <!-- // doesnt work  -->
+        </section>
+        <section class="child" id="fourth_page">
+            <div id="page-title">
+                <div id="stats">
+                    <header>Assortment of certain stats for your viewing pleasure</header>
+                    <h2 id="bombOne-text">So you dropped Something?</h2>
+                    <h2 id="bombTwo-text">Need no explanations!</h2>
+                    <h2 id="gameTimer-text">Is this time spent worth it? </h2>
+                </div>
+            </div>
+            <footer id="last-tag">
+                <p class="copyright">Copyright 2019</p>
+                <p class="message">Created with by <span class="name">SHIOW</span></p>
+            </footer>
+        </section></div>
+ <script type='text/javascript'  src="main.js"></script>
 </body>
 </html>
+
+<!-- <script type='text/javascript'  src="audioTest.js"></script> -->

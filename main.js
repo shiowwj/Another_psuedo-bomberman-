@@ -1,12 +1,18 @@
 let canvas = document.getElementById('gameScreen');
 let ctx = canvas.getContext('2d');
+var gameStatus = document.getElementById("score-text");
+var playerOneBombCount = document.getElementById("bombOne-text");
+var playerTwoBombCount = document.getElementById("bombTwo-text");
+var gameTimerCount = document.getElementById("gameTimer-text");
 
-const GAME_WIDTH = 900;
+//////GAME LOGIC STUFF
+
+const GAME_WIDTH = 900; // gameboard parameters
 const GAME_HEIGHT = 900;
 const GRID_WIDTH = 100;
 const GRID_HEIGHT = 100;
 
-var stoneRowCount = 4;
+var stoneRowCount = 4;  ///parameters stone obstacles
 var stoneColumnCount = 4;
 var stoneWidth = 100;
 var stoneHeight = 100;
@@ -14,27 +20,48 @@ var stonePadding = 100;
 var stoneOffsetTop = 100;
 var stoneOffsetLeft = 100;
 
-var playerOneXposition;
+var playerOneXposition; // Player One variables. Updated from created player one class. X-Y position and X-Y 'speed'.
 var playerOneYposition;
 var playerOneSpeedX;
 var playerOneSpeedY;
 
-var playerTwoXposition;
+var playerTwoXposition; // Player Two variables. Updated from created player two class. X-Y position and X-Y 'speed'.
 var playerTwoYposition;
 var playerTwoSpeedX;
 var playerTwoSpeedY;
 
-var players = [];
+// var players = [];
 var playerOneAlive = 1;
 var playerTwoAlive = 1;
-var checkOne = 1;
-var checkTwo = 1;
+// var checkOne = 1;
+// var checkTwo = 1;
 
-var bombPlayerOne = [];
-var bombPlayerTwo = [];
-var explodingArr =[];
+var bombPlayerOne = []; //Player One's bomb array.
+var bombPlayerTwo = []; //Player Two's bomb array.
+// var explodingArr =[];
 
-let gameTimer;
+let gameTimer; //game clock. Set to ms in function UpdateGameBoard
+
+////stats checker
+var playerOneMoveDist = 0;
+var playerTwoMoveDist = 0;
+var playerOneBombsUsed = 0;
+var playerTwoBombsUsed = 0;
+
+// var distanceTracker = function(){
+//     var Xone;
+//     var Yone;
+
+//     Xone += playerOneXposition;
+//     Yone += playerOneYposition;
+
+//     playerOneMoveDist = Math.sqrt((Xone*Xone) + (Yone*Yone));
+
+// }
+
+let lastTime = 0;
+let frame = 0;
+var requestFrame;
 
 var stones = [];
 for(var c=0; c<stoneColumnCount; c++) {
@@ -43,38 +70,8 @@ for(var c=0; c<stoneColumnCount; c++) {
         stones[c][r] = { x: 0, y: 0, status: 1};
     }
 }
-
-var boardRowCount = 9;
-var boardColumnCount = 9;
-var boardBlockWidth = 100;
-var boardBlockHeight = 100;
-
-var allBlocks = [[5, 5, 0, 0, 0, 0, 0, 0, 0],
-                 [5, 1, 0, 1, 0, 1, 0, 1, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 1, 0, 1, 0, 1, 0, 1, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 1, 0, 1, 0, 1, 0, 1, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 1, 0, 1, 0, 1, 0, 1, 5],
-                 [0, 0, 0, 0, 0, 0, 0, 5, 5]];
-/*
-for(var c=0; c<boardColumnCount; c++) {
-        for(var r=0; r<boardRowCount; r++) {
-            if(stones[c][r].status == 1){
-            var stoneX = (c*(stoneWidth+stonePadding))+stoneOffsetLeft;
-            var stoneY = (r*(stoneHeight+stonePadding))+stoneOffsetTop;
-            stones[c][r].x = stoneX;
-            stones[c][r].y = stoneY;
-            ctx.beginPath();
-            ctx.rect(stoneX, stoneY, stoneWidth, stoneHeight);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
-                }
-            }
-         }
-*/
+//Game Class creates game settings. From here, it creates other classes listed below. Game Loop. (other classes repeated called upon every 16ms.)
+//this creates the animation rendering for all objects in the canvas screen.
 class Game {
     constructor(gameWidth, gameHeight,gridWidth,gridHeight){
         this.gameWidth = gameWidth;
@@ -82,58 +79,40 @@ class Game {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
     }
-
     start() {
-
         this.board = new Background(this);
         this.stoneBlock = new Blocks(this);
         this.playerOne = new BomberMan(this);
         this.playerTwo = new BomberManTwo(this);
-                // for (var i = 0 ; i < 1; i++){
-                // players.push(new BombMan());
-                // }
-
 
         this.gameObjects = [
             this.board, this.stoneBlock, this.playerOne, this.playerTwo
-            //
+            //Overlapping code
         ];
-
-
         new InputHandler(this.playerOne);
         new InputHandlerTwo(this.playerTwo);
-
     }
-
     update(deltaTime,ctx) {
 
         this.playerOne.update(deltaTime);
         this.playerTwo.update(deltaTime);
-
         if(bombPlayerOne.length>0){
             bombPlayerOne.forEach(object => object.update(deltaTime,ctx));
         }
-
         if(bombPlayerTwo.length>0){
             bombPlayerTwo.forEach(object => object.update(deltaTime,ctx));
         }
-
+        // distanceTracker();
     }
 
     draw(ctx) {
-
         this.gameObjects.forEach(object => object.draw(ctx));
-
         if(bombPlayerOne.length > 0){
             bombPlayerOne.forEach(object => object.draw(ctx));
         }
         if(bombPlayerTwo.length >0){
             bombPlayerTwo.forEach(object => object.draw(ctx));
         }
-        // if(explodingArr.length > 0){
-        //     explodingArr.forEach(object => object.draw(ctx));
-        // }
-
     }
 }
 
@@ -144,8 +123,10 @@ class Background {
     }
 
     draw(ctx){
-        ctx.fillStyle = '#AB8C68';
-        ctx.fillRect(0, 0, this.width, this.height);
+
+        var imgBackground = new Image();   // Create new img element
+        imgBackground.src = 'img/gameboardbackground.jpg';
+        ctx.drawImage(imgBackground, 0, 0, this.width, this.height);
     } //only background color.
 }
 
@@ -165,6 +146,15 @@ class Blocks {
 
     draw(ctx) {
 
+        // window.onload = function() {
+        //   var canvas = document.getElementById("myCanvas");
+        //   var ctx = canvas.getContext("2d");
+        //   var img = document.getElementById("scream");
+        //   ctx.drawImage(img, 10, 10);
+        // context.drawImage(img,x,y,width,height);
+        // };
+        var imgStoneBlock = new Image();   // Create new img element
+        imgStoneBlock.src = 'img/stoneBlockPattern.jpg';
 
     for(var c=0; c<stoneColumnCount; c++) {
         for(var r=0; r<stoneRowCount; r++) {
@@ -173,11 +163,12 @@ class Blocks {
             var stoneY = (r*(stoneHeight+stonePadding))+stoneOffsetTop;
             stones[c][r].x = stoneX;
             stones[c][r].y = stoneY;
-            ctx.beginPath();
-            ctx.rect(stoneX, stoneY, stoneWidth, stoneHeight);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
+            // ctx.beginPath();
+            // ctx.rect(stoneX, stoneY, stoneWidth, stoneHeight);
+            ctx.drawImage(imgStoneBlock, stoneX, stoneY, stoneWidth, stoneHeight);
+            // ctx.fillStyle = "#0095DD";
+            // ctx.fill();
+            // ctx.closePath();
                 }
             }
          }
@@ -185,7 +176,7 @@ class Blocks {
 }
 
 class BomberMan {
-    constructor(game){
+    constructor(game,sad){
         this.gameWidth = GAME_WIDTH;
         this.gameHeight = GAME_HEIGHT;
         this.gridWidth = GRID_WIDTH;
@@ -197,17 +188,19 @@ class BomberMan {
         this.speedX = 0;
         this.speedY = 0;
 
+        this.distanceMoved = 0;
+
         this.game = game;
 
         this.position = {
-            x : this.gridWidth/2,
+            x : this.gridWidth/2 ,
             y : this.gridHeight/2
         }
 
-        this.positionTwo = {
-            x : this.gameWidth - this.gridWidth/2,
-            y : this.gameHeight - this.gridHeight/2
-        }
+        // this.positionTwo = {
+        //     x : this.gameWidth - this.gridWidth/2,
+        //     y : this.gameHeight - this.gridHeight/2
+        // }
 
         this.statusAlive = true;
     }
@@ -234,16 +227,19 @@ class BomberMan {
     }
 
     draw(ctx) {
-         // && checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo,1) > 0
-          // && checkOne > 0
+
+        var imgPlayerOne = new Image();   // Create new img element
+        imgPlayerOne.src = 'img/playerOne.jpg';
+        // ctx.drawImage(imgPlayOne, 0, 0, this.width, this.height);
         if(playerOneAlive > 0){ //if this statement both true then will show player 1
-            ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-            ctx.linewidth = 3;
-            ctx.strokeStyle="red";
-            ctx.fillStyle = "green";
-            ctx.fill();
-            ctx.stroke();
+            // ctx.beginPath();
+            // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+            ctx.drawImage(imgPlayerOne, this.position.x-25, this.position.y-25, 2*this.radius, 2*this.radius); // width & height both at 50 pixels
+            // ctx.linewidth = 3;
+            // ctx.strokeStyle="red";
+            // ctx.fillStyle = "green";
+            // ctx.fill();
+            // ctx.stroke();
         } else {
             console.log("Player One ded");
         }
@@ -251,9 +247,12 @@ class BomberMan {
 
     update(deltaTime) {
 
-            playerOneXposition = this.game.playerOne.position.x;
-            playerOneYposition = this.game.playerOne.position.y;
+            playerOneXposition = this.game.playerOne.position.x ;
+            playerOneYposition = this.game.playerOne.position.y ;
 
+            this.distanceMoved = Math.sqrt((playerOneXposition*playerOneXposition) + (playerOneYposition*playerOneYposition));
+
+            playerOneMoveDist = this.distanceMoved;
             // console.log("Player 1, " + "x-coord: " + playerOneXposition +"," +"y-coord: "+ playerOneYposition);
 
             this.position.x += this.speedX;
@@ -264,7 +263,7 @@ class BomberMan {
 
     //checks if bomberman on left or right wall
         if(this.position.x < this.radius){
-            this.position.x =this.radius;
+            this.position.x =  this.radius;
         }
 
         if(this.gameWidth - this.radius < this.position.x){
@@ -284,7 +283,7 @@ class BomberMan {
         let player_XpositionRight = this.position.x + this.radius;
         let player_XpositionLeft = this.position.x - this.radius;
         let player_YpositionTop = this.position.y - this.radius;
-        let player_YpositionBottom = this.position.y + this.radius
+        let player_YpositionBottom = this.position.y + this.radius;
 
         for(var c=0; c<stoneColumnCount; c++) {
             for(var r=0; r<stoneRowCount; r++) {
@@ -354,15 +353,19 @@ class BomberManTwo {
     }
 
     draw(ctx) {
+        var imgPlayerTwo = new Image();   // Create new img element
 
+        imgPlayerTwo.src = 'img/playerTwo.jpg';
         if(playerTwoAlive > 0){
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-        ctx.linewidth = 3;
-        ctx.strokeStyle="green";
-        ctx.fillStyle = "red";
-        ctx.fill();
-        ctx.stroke();
+
+            ctx.drawImage(imgPlayerTwo, this.position.x-25, this.position.y-25, 2*this.radius, 2*this.radius);
+        // ctx.beginPath();
+        // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+        // ctx.linewidth = 3;
+        // ctx.strokeStyle="green";
+        // ctx.fillStyle = "red";
+        // ctx.fill();
+        // ctx.stroke();
     } else{
         console.log("Player Two ded");
     }
@@ -434,7 +437,7 @@ class BombOne{
         this.width = 80;
         this.height = 80;
 
-         this.timeCreated = gameTimer;
+        this.timeCreated = gameTimer;
 
         this.instance = 0;
 
@@ -456,9 +459,18 @@ class BombOne{
     }
 
     draw(ctx){
+
+        var imgBombOne = new Image();
+        var imgBombExplodeOne = new Image();   // Create new img element
+        imgBombOne.src = 'img/bombPattern2.png';
+        imgBombExplodeOne.src = 'img/explosionPattern.jpg';
+
             if(this.status == 0 ){
-                ctx.fillStyle = "#262626";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
+
+                // ctx.fillStyle = "#262626";
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+
             }else if(this.status == 1){
                 if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -469,19 +481,25 @@ class BombOne{
                     console.log("In the Blast Range");
                     playerOneAlive = 0;
                 }
-                ctx.fillStyle = "#CE594B";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+                // ctx.fillStyle = "#CE594B";
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-200, this.y_bomb, this.width, this.height);
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
 
             if(this.status == 0 ){
-                ctx.fillStyle = "#262626";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                // ctx.fillStyle = "#262626";
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                 if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -492,12 +510,17 @@ class BombOne{
                     console.log("In the Blast Range");
                     playerTwoAlive = 0;
                 }
-                ctx.fillStyle = "#CE594B";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+                // ctx.fillStyle = "#CE594B";
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeOne, this.x_bomb-200, this.y_bomb, this.width, this.height);
+                ctx.fillRect(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
@@ -547,10 +570,17 @@ class BombTwo{
     }
 
     draw(ctx){
+
+        var imgBombTwo = new Image();
+        var imgBombExplodeTwo = new Image();   // Create new img element
+        imgBombTwo.src = 'img/bombPattern5.png';
+        imgBombExplodeTwo.src = 'img/explosionPattern2.png';
+
         if(this.amount !== 0){
             if(this.status == 0 ){
-                ctx.fillStyle = "#262626";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                // ctx.fillStyle = "#262626";
+                ctx.drawImage(imgBombTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                     if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -562,12 +592,17 @@ class BombTwo{
 
                     playerOneAlive = 0;
                 }
-                ctx.fillStyle = "#CE594B";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-200, this.y_bomb, this.width, this.height);
+                // ctx.fillStyle = "#CE594B";
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerTwo.shift();
             }
@@ -575,8 +610,9 @@ class BombTwo{
 
         if(this.amount !== 0){
             if(this.status == 0 ){
-                ctx.fillStyle = "#262626";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                // ctx.fillStyle = "#262626";
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                     if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -588,12 +624,17 @@ class BombTwo{
 
                     playerTwoAlive = 0;
                 }
-                ctx.fillStyle = "#CE594B";
-                ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
+                // ctx.fillStyle = "#CE594B";
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombExplodeTwo, this.x_bomb-200, this.y_bomb, this.width, this.height);
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
+                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
+                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
+                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerTwo.shift();
             }
@@ -622,23 +663,30 @@ class InputHandler {
         document.addEventListener('keydown',event => {
             switch(event.keyCode) {
                 case 65:
-                    playerOne.moveLeft();
+                    playerOne.moveLeft()
+                    playerOneMoveDist++;
                     break;
 
                 case 68:
-                    playerOne.moveRight();
+                    playerOne.moveRight()
+                    playerOneMoveDist++;;
                     break;
 
                 case 87:
-                    playerOne.moveUp();
+                    playerOne.moveUp()
+                    playerOneMoveDist++;;
                     break;
 
                 case 83:
-                    playerOne.moveDown();
+                    playerOne.moveDown()
+                    playerOneMoveDist++;;
                     break;
 
-                case 32:
+                case 67:
                     bombPlayerOne.push(new BombOne());
+                    playerOneBombsUsed++;
+                    gameStatus.innerText = "Player One placed Bomb."
+                    playerOneBombCount.innerText = "Player One\ Bomb Count: " + playerOneBombsUsed;
                     break;
             }
         });
@@ -672,46 +720,48 @@ class InputHandlerTwo {
     constructor(playerTwo) {
         document.addEventListener('keydown',event => {
             switch(event.keyCode) {
-                case 76:
+                case 74:
                     playerTwo.moveLeft();
                     break;
 
-                case 222:
+                case 76:
                     playerTwo.moveRight();
                     break;
 
-                case 80:
+                case 73:
                     playerTwo.moveUp();
                     break;
 
-                case 186:
+                case 75:
                     playerTwo.moveDown();
                     break;
 
-                case 77:
+                case 220:
                     bombPlayerTwo.push(new BombTwo());
+                    playerTwoBombsUsed++;
+                    gameStatus.innerText = "Player Two placed Bomb."
+                    playerTwoBombCount.innerText = "Player Two\ Bomb Count: " + playerTwoBombsUsed;
                     break;
-
             }
         });
         document.addEventListener('keyup',event => {
             switch(event.keyCode) {
-                case 76:
+                case 74:
                     if(playerTwo.speedX < 0 )
                     playerTwo.stop();
                     break;
 
-                case 222:
+                case 76:
                     if(playerTwo.speedX >0)
                     playerTwo.stop();
                     break;
 
-                case 80:
+                case 73:
                     if(playerTwo.speedY < 0)
                     playerTwo.stop();
                     break;
 
-                case 186:
+                case 75:
                     if(playerTwo.speedY > 0)
                     playerTwo.stop();
                     break;
@@ -720,12 +770,16 @@ class InputHandlerTwo {
     }
 }
 
-let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT,playerOneXposition,playerOneYposition);
+//game init variables
+let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT);
+
 game.start();
 
-let lastTime = 0;
-let frame = 0;
-function updateGameBoard(timestamp) {
+var updateGameBoard =function(timestamp) {
+
+    if(playerOneAlive == 1 && playerTwoAlive ==1){
+    requestAnimationFrame(updateGameBoard);
+    }
     let deltaTime = timestamp - lastTime;
     lastTime = timestamp;
 
@@ -737,63 +791,42 @@ function updateGameBoard(timestamp) {
     counter = frame/60;
     gameTimer = counter;
 
-    requestAnimationFrame(updateGameBoard);
-}
+    gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____ wasted."
 
+    if(playerOneAlive == 0 && playerTwoAlive == 0){
+        gameStatus.innerText = "Both Players are Dead."
+        console.log("Both Players are Dead.");
+    } else if(playerOneAlive == 0){
+        gameStatus.innerText = "Player One is Dead."
+        console.log("Player One is Dead.");
+    } else if(playerTwoAlive == 0){
+       gameStatus.innerText = "Player Two is Dead."
+        console.log("Player Two is Dead.");
+    }
+}
 requestAnimationFrame(updateGameBoard);
 
+var runGameCheck = function(){
+    if(playerOneAlive == 0 || playerTwoAlive == 0){
+        // alert("We are here now.");
+        cancelAnimationFrame(requestFrame);
+        console.log("hello");
+    } else {
+        game.start();
+        requestAnimationFrame(updateGameBoard);
+    }
+}
+var gameStatus = document.getElementById("score-text");
 
-/*
-    //problem: when the other play(2) adds the bomb. player(1) is removed from game board.
-
-    // checkOtherPlayerBomb(playerOneXposition,playerOneYposition,bombPlayerTwo)
-    // var checkOtherPlayerBomb = function(playerXpos,playerYpos,bombArr,playerID) { //i need this to run with requestframe.....
-    //     var currentXBombCoords;
-    //     var currentYBombCoords;
-    //     var player =[];
-    //     var check;
-
-    //     if(playerID == 1){
-    //         check = checkOne;
-    //     } else if(playerID ==2){
-    //         check = checkTwo;
-    //     }
-
-    //     if(bombArr.length == 0){
-    //     // from this i can know what is the bomb coords the player is on. I can set if affected or not. (i still don't know in game time.... if I am stepping OVER IT.)
-    //         console.log("NO bombs LAID")
-    //         console.log(check);
-    //         return check;
-    //     } else if( bombArr.length > 0){
-    //              for(var i = 0; i < bombArr.length; i ++){
-    //                 currentXBombCoords = bombArr[i].x_cornerCoords;
-    //                 currentYBombCoords = bombArr[i].y_cornerCoords;
-    //                     if((Math.ceil(playerXpos/100)*100 == currentXBombCoords) // checks if player is on ANY of the BOMB position
-    //                     && ((Math.ceil(playerYpos/100)*100)-100 == currentYBombCoords) ){
-    //                         // if()
-    //                             console.log("This bomb is the " + i + "item on the bomb arr."); // this tell me which bomb is on the player . Able to retrieve coordinates
-    //                             console.log("X coord of BOMB that hits: " + bombArr[i].x_cornerCoords);
-    //                             console.log("Y coord of BOMB that hits: " + bombArr[i].y_cornerCoords);
-    //                             console.log("OTHER PLAYER HIT YOU")
-    //                             check = 0;
-    //                             if(playerID == 1){
-    //                                 checkOne = check;
-    //                             } else if(playerID ==2){
-    //                                 checkTwo = check;
-    //                             }
-    //                         return check;
-    //                     }else {
-    //                             console.log("No")
-    //                             console.log("No affected by these...: " + i);
-    //                             console.log(check);
-    //                         return check;
-    //                     }
-    //                 }
-    //             }
-    // }
-
-    // var checkXcoord = function(playerXpos,playerYpos,bombArr){
-    //     var Xcoord;
-
-    // }
-*/
+////////DOM STUFF
+var restartGame = function(){
+    console.log(playerOneAlive);
+    playerOneAlive = 1;
+    playerTwoAlive = 1;
+    playerOneBombsUsed = 0;
+    playerTwoBombsUsed = 0;
+    console.log(playerOneAlive+"here");
+    console.log("hello")
+    game.start();
+    requestAnimationFrame(updateGameBoard);
+}
