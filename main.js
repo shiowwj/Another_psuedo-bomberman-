@@ -421,14 +421,18 @@ class BombOne{
 
     draw(ctx){
         //explosion mechanics
-        var imgBombOne = new Image();
+        // var imgBombOne = new Image();
         var imgBombExplodeOne = new Image();   // Create new img element
-        imgBombOne.src = 'img/bombPattern2.png';
+        // imgBombOne.src = 'img/bombPattern2.png';
         imgBombExplodeOne.src = 'img/explosionPattern.jpg';
+         var imgBombTwo = new Image();
+        // var imgBombExplodeTwo = new Image();   // Create new img element
+        imgBombTwo.src = 'img/bombPattern5.png';
+        // imgBombExplodeTwo.src = 'img/explosionPattern2.png';
         //logic here works with bomb class update function to determine state of bomb
         //place 1. place bomb  // 2. fuse time for bomb   //3. Explosion for bomb //4. Removal of bomb from canvas
             if(this.status == 0 ){
-                ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                 if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -449,7 +453,7 @@ class BombOne{
             }
 
             if(this.status == 0 ){
-                ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
+                ctx.drawImage(imgBombTwo, this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                 if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -465,7 +469,6 @@ class BombOne{
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-200, this.y_bomb, this.width, this.height);
-                ctx.fillRect(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
@@ -723,15 +726,16 @@ let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT);
 game.start();
 
 //animation engine function
-var updateGameBoard =function(timestamp) {
+function updateGameBoard(timestamp) {
 
     if(playerOneAlive == 1 && playerTwoAlive ==1){
     requestAnimationFrame(updateGameBoard);
     }
+    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
     let deltaTime = timestamp - lastTime;
     lastTime = timestamp;
 
-    ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
 
     game.update(deltaTime);
     game.draw(ctx);
@@ -740,7 +744,6 @@ var updateGameBoard =function(timestamp) {
     gameTimer = counter;
 
     // gameTimerCount.innerText = Math.floor(gameTimer) + " seconds of your _____  wasted."
-
     if(playerOneAlive == 0 && playerTwoAlive == 0){
         gameStatusOne.innerText = "Both Players are Dead."
         console.log("Both Players are Dead.");
@@ -748,16 +751,15 @@ var updateGameBoard =function(timestamp) {
         gameStatusOne.innerText = "Player One is Dead."
         console.log("Player One is Dead.");
     } else if(playerTwoAlive == 0){
-       gameStatusOne.innerText = "Player Two is Dead."
+        gameStatusOne.innerText = "Player Two is Dead."
         console.log("Player Two is Dead.");
     }
 }
 requestAnimationFrame(updateGameBoard);
-s
+
 ////////DOM STUFF
-//restart game button // resets parameters for game to restart
-var restartGame = function(){
-    console.log(playerOneAlive);
+//restart game button // resets parameters for game to restart //broken... why are you broken....
+function restartGame(){
     playerOneAlive = 1;
     playerTwoAlive = 1;
     playerOneBombsUsed = 0;
@@ -766,5 +768,5 @@ var restartGame = function(){
     requestAnimationFrame(updateGameBoard);
 }
     //Use of this key.word in all class creators. this enables any class to excess the Class Game method for any parameter.
-    //class Game behaves as the tree trunk of for the rest of the game object classes(i.e bomberman, bombone). Pulling any required parameters.
+    //choppy performance. Suspect it might be breaking my code periodically....
     //Note: Not too efficient. Slows my browser speed. Especially when all called functions are being invoked every 16ms.
