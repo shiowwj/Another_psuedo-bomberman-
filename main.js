@@ -12,7 +12,7 @@ const GAME_HEIGHT = 900;
 const GRID_WIDTH = 100;
 const GRID_HEIGHT = 100;
 
-var stoneRowCount = 4;  ///parameters stone obstacles
+var stoneRowCount = 4;  ///parameters for stone obstacles
 var stoneColumnCount = 4;
 var stoneWidth = 100;
 var stoneHeight = 100;
@@ -48,21 +48,10 @@ var playerTwoMoveDist = 0;
 var playerOneBombsUsed = 0;
 var playerTwoBombsUsed = 0;
 
-// var distanceTracker = function(){
-//     var Xone;
-//     var Yone;
-
-//     Xone += playerOneXposition;
-//     Yone += playerOneYposition;
-
-//     playerOneMoveDist = Math.sqrt((Xone*Xone) + (Yone*Yone));
-
-// }
-
 let lastTime = 0;
 let frame = 0;
 var requestFrame;
-
+//creating stone obstacle Array
 var stones = [];
 for(var c=0; c<stoneColumnCount; c++) {
     stones[c] = [];
@@ -73,18 +62,20 @@ for(var c=0; c<stoneColumnCount; c++) {
 //Game Class creates game settings. From here, it creates other classes listed below. Game Loop. (other classes repeated called upon every 16ms.)
 //this creates the animation rendering for all objects in the canvas screen.
 class Game {
+    //creates game class
     constructor(gameWidth, gameHeight,gridWidth,gridHeight){
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
     }
+    //creates other game object classes here
     start() {
         this.board = new Background(this);
         this.stoneBlock = new Blocks(this);
         this.playerOne = new BomberMan(this);
         this.playerTwo = new BomberManTwo(this);
-
+    //game object arry
         this.gameObjects = [
             this.board, this.stoneBlock, this.playerOne, this.playerTwo
             //Overlapping code
@@ -93,7 +84,7 @@ class Game {
         new InputHandlerTwo(this.playerTwo);
     }
     update(deltaTime,ctx) {
-
+        //renders all created objects with requestanimationframe function
         this.playerOne.update(deltaTime);
         this.playerTwo.update(deltaTime);
         if(bombPlayerOne.length>0){
@@ -102,10 +93,10 @@ class Game {
         if(bombPlayerTwo.length>0){
             bombPlayerTwo.forEach(object => object.update(deltaTime,ctx));
         }
-        // distanceTracker();
     }
 
     draw(ctx) {
+        //draws all objects
         this.gameObjects.forEach(object => object.draw(ctx));
         if(bombPlayerOne.length > 0){
             bombPlayerOne.forEach(object => object.draw(ctx));
@@ -115,13 +106,13 @@ class Game {
         }
     }
 }
-
+//background board object creator
 class Background {
     constructor(game){
         this.width = game.gameWidth;
         this.height = game.gameHeight;
     }
-
+    //draw function for background board, game class draw() calls this (static)
     draw(ctx){
 
         var imgBackground = new Image();   // Create new img element
@@ -145,14 +136,7 @@ class Blocks {
     }
 
     draw(ctx) {
-
-        // window.onload = function() {
-        //   var canvas = document.getElementById("myCanvas");
-        //   var ctx = canvas.getContext("2d");
-        //   var img = document.getElementById("scream");
-        //   ctx.drawImage(img, 10, 10);
-        // context.drawImage(img,x,y,width,height);
-        // };
+        //draw function for blocks on gameboard, game class draw() calls this (static)
         var imgStoneBlock = new Image();   // Create new img element
         imgStoneBlock.src = 'img/stoneBlockPattern.jpg';
 
@@ -163,12 +147,7 @@ class Blocks {
             var stoneY = (r*(stoneHeight+stonePadding))+stoneOffsetTop;
             stones[c][r].x = stoneX;
             stones[c][r].y = stoneY;
-            // ctx.beginPath();
-            // ctx.rect(stoneX, stoneY, stoneWidth, stoneHeight);
             ctx.drawImage(imgStoneBlock, stoneX, stoneY, stoneWidth, stoneHeight);
-            // ctx.fillStyle = "#0095DD";
-            // ctx.fill();
-            // ctx.closePath();
                 }
             }
          }
@@ -177,12 +156,14 @@ class Blocks {
 
 class BomberMan {
     constructor(game,sad){
+        //bomberman class creator function. Called by game start function to create object
         this.gameWidth = GAME_WIDTH;
         this.gameHeight = GAME_HEIGHT;
         this.gridWidth = GRID_WIDTH;
         this.gridHeight = GRID_HEIGHT;
         this.radius = 25;
-
+        //maxSpeed allows velocity of the object on canvas
+        //Moves 9pixel (in any direction/frame refresh)
         this.maxSpeedX = 9;
         this.maxSpeedY = 9;
         this.speedX = 0;
@@ -196,15 +177,12 @@ class BomberMan {
             x : this.gridWidth/2 ,
             y : this.gridHeight/2
         }
-
-        // this.positionTwo = {
-        //     x : this.gameWidth - this.gridWidth/2,
-        //     y : this.gameHeight - this.gridHeight/2
-        // }
-
         this.statusAlive = true;
     }
-
+    //movement functions, Called by inputhandler function
+    //players move on the canvas based on increment or decrement values of x-y coordinates on the canvas
+    //moving left = negative x value on canvas ; moving right = positive x value on canvas; moving up = negative y value on canvas ; moving down = positive y value on canvas
+    //
     moveLeft(){
         this.speedX = -this.maxSpeedX;
     }
@@ -230,38 +208,29 @@ class BomberMan {
 
         var imgPlayerOne = new Image();   // Create new img element
         imgPlayerOne.src = 'img/playerOne.jpg';
-        // ctx.drawImage(imgPlayOne, 0, 0, this.width, this.height);
         if(playerOneAlive > 0){ //if this statement both true then will show player 1
-            // ctx.beginPath();
-            // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
             ctx.drawImage(imgPlayerOne, this.position.x-25, this.position.y-25, 2*this.radius, 2*this.radius); // width & height both at 50 pixels
-            // ctx.linewidth = 3;
-            // ctx.strokeStyle="red";
-            // ctx.fillStyle = "green";
-            // ctx.fill();
-            // ctx.stroke();
         } else {
             console.log("Player One ded");
         }
     }
 
     update(deltaTime) {
-
+        //based on keyboard event listener to manipulate x-y values (+/-). Update function is called by game loop (refreshed on the browser every 16ms) to reposition based on previous x-y coordinates. This allows objects to 'move'.
             playerOneXposition = this.game.playerOne.position.x ;
             playerOneYposition = this.game.playerOne.position.y ;
 
             this.distanceMoved = Math.sqrt((playerOneXposition*playerOneXposition) + (playerOneYposition*playerOneYposition));
 
             playerOneMoveDist = this.distanceMoved;
-            // console.log("Player 1, " + "x-coord: " + playerOneXposition +"," +"y-coord: "+ playerOneYposition);
 
             this.position.x += this.speedX;
             this.position.y += this.speedY;
 
             playerOneSpeedX = this.speedX;
             playerOneSpeedY = this.speedY;
-
-    //checks if bomberman on left or right wall
+    //Collision Detection Mechanics
+    //checks if bomberman hits on left or right wall
         if(this.position.x < this.radius){
             this.position.x =  this.radius;
         }
@@ -270,7 +239,7 @@ class BomberMan {
             this.position.x = this.gameWidth - this.radius;
         }
 
-    //checks if bomberman on top and bottom wall.
+    //checks if bomberman hits on top and bottom wall.
         if(this.position.y < this.radius){
             this.position.y = this.radius;
         }
@@ -279,7 +248,7 @@ class BomberMan {
             this.position.y = this.gameHeight - this.radius;
         }
 
-    //checks if bomberman on stone blocks (blocks) //40min on video
+    //checks if bomberman hits on stone blocks (blocks) //
         let player_XpositionRight = this.position.x + this.radius;
         let player_XpositionLeft = this.position.x - this.radius;
         let player_YpositionTop = this.position.y - this.radius;
@@ -308,9 +277,10 @@ class BomberMan {
         }
     }
 }// circle representing bomber-man
-
+//Mostly repeated parameters from BomberManOne Class (yet to re-factor code....)
 class BomberManTwo {
     constructor(game){
+        //bombermanTwo class creator function. Called by game start function to create object
         this.gameWidth = GAME_WIDTH;
         this.gameHeight = GAME_HEIGHT;
         this.gridWidth = GRID_WIDTH;
@@ -354,18 +324,9 @@ class BomberManTwo {
 
     draw(ctx) {
         var imgPlayerTwo = new Image();   // Create new img element
-
         imgPlayerTwo.src = 'img/playerTwo.jpg';
         if(playerTwoAlive > 0){
-
             ctx.drawImage(imgPlayerTwo, this.position.x-25, this.position.y-25, 2*this.radius, 2*this.radius);
-        // ctx.beginPath();
-        // ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-        // ctx.linewidth = 3;
-        // ctx.strokeStyle="green";
-        // ctx.fillStyle = "red";
-        // ctx.fill();
-        // ctx.stroke();
     } else{
         console.log("Player Two ded");
     }
@@ -375,13 +336,13 @@ class BomberManTwo {
 
             playerTwoXposition = this.game.playerTwo.position.x;
             playerTwoYposition = this.game.playerTwo.position.y;
-            // console.log("Player 2, " + "x-coord: " + this.game.playerTwo.position.x +"," +"y-coord: "+ this.game.playerTwo.position.y);
+
             this.position.x += this.speedX;
             this.position.y += this.speedY;
 
             playerTwoSpeedX = this.speedX;
             playerTwoSpeedY = this.speedY;
-    //checks if bomberman on left or right wall
+    //checks if bomberman hits on left or right wall
         if(this.position.x < this.radius){
             this.position.x =this.radius;
         }
@@ -390,7 +351,7 @@ class BomberManTwo {
             this.position.x = this.gameWidth - this.radius;
         }
 
-    //checks if bomberman on top and bottom wall.
+    //checks if bomberman hits on top and bottom wall.
         if(this.position.y < this.radius){
             this.position.y = this.radius;
         }
@@ -398,8 +359,8 @@ class BomberManTwo {
         if(this.gameHeight - this.radius < this.position.y){
             this.position.y = this.gameHeight - this.radius;
         }
-
-    //checks if bomberman on stone blocks (blocks) //40min on video
+    //Collision Detection Mechanics
+    //checks if bomberman hits on stone blocks (blocks) //
         let player_XpositionRight = this.position.x + this.radius;
         let player_XpositionLeft = this.position.x - this.radius;
         let player_YpositionTop = this.position.y - this.radius;
@@ -431,7 +392,7 @@ class BomberManTwo {
 
 class BombOne{
     constructor(game){
-
+        //bomb class parameters
         this.gridWidth = GRID_WIDTH;
         this.gridHeight = GRID_HEIGHT;
         this.width = 80;
@@ -459,18 +420,15 @@ class BombOne{
     }
 
     draw(ctx){
-
+        //explosion mechanics
         var imgBombOne = new Image();
         var imgBombExplodeOne = new Image();   // Create new img element
         imgBombOne.src = 'img/bombPattern2.png';
         imgBombExplodeOne.src = 'img/explosionPattern.jpg';
-
+        //logic here works with bomb class update function to determine state of bomb
+        //place 1. place bomb  // 2. fuse time for bomb   //3. Explosion for bomb //4. Removal of bomb from canvas
             if(this.status == 0 ){
                 ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
-
-                // ctx.fillStyle = "#262626";
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
-
             }else if(this.status == 1){
                 if( ((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords))  // center
                     ||((Math.ceil(playerOneXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerOneYposition/100)*100)-100 == this.y_cornerCoords - 100)) // top
@@ -481,24 +439,16 @@ class BombOne{
                     console.log("In the Blast Range");
                     playerOneAlive = 0;
                 }
-                // ctx.fillStyle = "#CE594B";
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-200, this.y_bomb, this.width, this.height);
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
 
             if(this.status == 0 ){
-                // ctx.fillStyle = "#262626";
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
             }else if(this.status == 1){
                 if( ((Math.ceil(playerTwoXposition/100)*100 == this.x_cornerCoords) && ((Math.ceil(playerTwoYposition/100)*100)-100 == this.y_cornerCoords))  // center
@@ -510,37 +460,33 @@ class BombOne{
                     console.log("In the Blast Range");
                     playerTwoAlive = 0;
                 }
-                // ctx.fillStyle = "#CE594B";
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb+100, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-100, this.y_bomb-100, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb, this.y_bomb, this.width, this.height);
                 ctx.drawImage(imgBombExplodeOne, this.x_bomb-200, this.y_bomb, this.width, this.height);
                 ctx.fillRect(imgBombExplodeOne, this.x_bomb-100, this.y_bomb, this.width, this.height); //yx
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb+100, this.width, this.height); // y change +
-                // ctx.fillRect(this.x_bomb-100, this.y_bomb-100, this.width, this.height); // y change -
-                // ctx.fillRect(this.x_bomb, this.y_bomb, this.width, this.height); // x change +
-                // ctx.fillRect(this.x_bomb-200, this.y_bomb, this.width, this.height); // x change -
             }else if(this.status == 2){
                 bombPlayerOne.shift();
             }
     }
 
     update(deltaTime){
+        //checks with game time to sequentially do bomb processing checks
             let detonationTimer = 3; // status 0
             let timeToDet = this.timeCreated + detonationTimer; //status 0
             let timeOfExplode = timeToDet + 1.5; // change to status 1
             let timeToDisappear = timeOfExplode + 2;              // change to status 2
-
-            if(gameTimer > timeToDet && gameTimer < timeOfExplode){
-                this.status = 1;
+        //place 1. place bomb  // 2. fuse time for bomb   //3. Explosion for bomb //4. Removal of bomb from canvas
+            if(gameTimer > timeToDet && gameTimer < timeOfExplode){ //therefore, if conditional time is met
+                this.status = 1; //bomb status changes
             } else if(gameTimer > timeOfExplode ){
-                this.status = 2;
+                this.status = 2; //bomb status changes
             }
     }
 }
 
-class BombTwo{
+class BombTwo{ //Basically similar format with BombOne
     constructor(game){
 
         this.gridWidth = GRID_WIDTH;
@@ -657,7 +603,7 @@ class BombTwo{
             }
     }
 }
-
+//keyboard event handler. Calls functions from class objects(playerone, playertwo, bombOne & bombTwo) to move around the canvas and place bombs
 class InputHandler {
     constructor(playerOne) {
         document.addEventListener('keydown',event => {
@@ -689,7 +635,7 @@ class InputHandler {
                     playerOneBombCount.innerText = "Player One\ Bomb Count: " + playerOneBombsUsed;
                     break;
             }
-        });
+        }); //key down stops object from 'moving'
         document.addEventListener('keyup',event => {
             switch(event.keyCode) {
                 case 65:
@@ -773,8 +719,10 @@ class InputHandlerTwo {
 //game init variables
 let game = new Game(GAME_WIDTH,GAME_HEIGHT,GRID_WIDTH,GRID_HEIGHT);
 
+//Creates all objects indicated at game start function
 game.start();
 
+//animation engine function
 var updateGameBoard =function(timestamp) {
 
     if(playerOneAlive == 1 && playerTwoAlive ==1){
@@ -805,28 +753,18 @@ var updateGameBoard =function(timestamp) {
     }
 }
 requestAnimationFrame(updateGameBoard);
-
-var runGameCheck = function(){
-    if(playerOneAlive == 0 || playerTwoAlive == 0){
-        // alert("We are here now.");
-        cancelAnimationFrame(requestFrame);
-        console.log("hello");
-    } else {
-        game.start();
-        requestAnimationFrame(updateGameBoard);
-    }
-}
-
-
+s
 ////////DOM STUFF
+//restart game button // resets parameters for game to restart
 var restartGame = function(){
     console.log(playerOneAlive);
     playerOneAlive = 1;
     playerTwoAlive = 1;
     playerOneBombsUsed = 0;
     playerTwoBombsUsed = 0;
-    console.log(playerOneAlive+"here");
-    console.log("hello")
     game.start();
     requestAnimationFrame(updateGameBoard);
 }
+    //Use of this key.word in all class creators. this enables any class to excess the Class Game method for any parameter.
+    //class Game behaves as the tree trunk of for the rest of the game object classes(i.e bomberman, bombone). Pulling any required parameters.
+    //Note: Not too efficient. Slows my browser speed. Especially when all called functions are being invoked every 16ms.
