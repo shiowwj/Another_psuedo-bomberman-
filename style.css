@@ -66,7 +66,7 @@ section{
   height: 900px;
   background-image: url("img/tilepattern3.png");
   margin: 10px;
-  border: 20px solid #744E58;
+  border: 5px solid #744E58;
   border-radius: 50px;
 }
 
@@ -108,10 +108,10 @@ section{
 #score-text {
 	display: inline-block;
 	background-color: #3B2D42;
-	margin: 10px 10px 10px 10px;
-	padding:20px 10px 20px 10px;
+	margin: 2px 2px 2px 2px;
+	padding:5px 5px 5px 5px;
 	background-color: #3B2D42;
-	border: 3px solid #b3ff51;
+	border: 2px solid #b3ff51;
 	border-radius: 30px;
 }
 
@@ -176,7 +176,6 @@ display:block;
 
 
 
-
 /*CSS SOURCED ONLINE*/
 
 .restartGame {
@@ -201,6 +200,26 @@ display:block;
 .restartGame:active {
 	position:relative;
 	top:1px;
+}
+
+#alert{
+	color:red;
+}
+
+.keyboard-settings{
+	padding-left: 30px;
+	padding-right: 30px;
+	display:flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.content-canvas{
+	text-align: center;
+}
+
+#gameScreen{
+	width: 80%;
 }
 
 .toTheStats {

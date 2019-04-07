@@ -21,14 +21,19 @@
                 <header>Game Instructions</header>
             </div>
             <div class="container" id="instructions">
-                <h1>Remove your opponent on the gamebaord by placing bombs.<br>Bombs go off in 3 seconds.<br>Standing in the blast zones will result in death. <br>Bombs Go Off after 3 SECONDS.</h1>
-                <div class="col-container">
-                    <h2>Player One (Top Left Corner):</h2>
-                    <p>‘W’ - up,<br>’S’ - down,<br>‘A’ - left,<br>‘D’ - right,<br>’C’ - drop bomb</p>
+                <h1>Place BOMBS and DESTORY your OPPONENT!<br><span id="alert">BOMBS GO OFF</span> in 2 SECONDS.<br>Standing in the BLAST ZONES will result in DEATH. <br><span id="alert">BOMBS GO OFF</span> in 2 SECONDS.</h1>
+                <div class="row keyboard-settings">
+                    <div class="col-container">
+                        <h2>Player One (Top Left Corner):</h2>
+                        <p>‘W’ - up,<br>’S’ - down,<br>‘A’ - left,<br>‘D’ - right,<br>’C’ - drop bomb</p>
+                    </div>
+                    <div class="col-container">
+                        <h2>Player Two (Bottom Right Corner):</h2>
+                        <p>‘I ’ - up,<br>’’K’ - down,<br>‘J’ - left,<br>‘L’ - right,<br>’\ / | ’ - drop bomb (key next to square brackets) </p>
+                    </div>
                 </div>
-                <div class="col-container">
-                    <h2>Player Two (Bottom Right Corner):</h2>
-                    <p>‘I ’ - up,<br>’’K’ - down,<br>‘J’ - left,<br>‘L’ - right,<br>’\ / | ’ - drop bomb (key next to square brackets) </p>
+                <div>
+                    <h4>For Best Player Experience, maximize your browser.</h4>
                 </div>
             </div>
             <div id="space-bar-prompt-2">
@@ -37,13 +42,15 @@
         </section>
         <section class="child" id="third_page">
             <div class="game-score-board">
-                <h2 id="score-text">U did What?</h2>
+                <button href="#" class="restartGame" onclick="restartGame()">Restart Game</button>
+                <h4 id="score-text">U did What?</h4>
+                <button href="#fourth_page" class="toTheStats" onclick="">View Game Stats</button> <!-- // doesnt work  -->
             </div>
-            <div class="container_canvas">
+            <div class="container_canvas content-canvas">
                 <canvas id="gameScreen" width="900" height="900"> </canvas>
             </div>
-                <button href="#" class="restartGame" onclick="restartGame()">Restart Game</button>
-                <button href="#fourth_page" class="toTheStats" onclick="">View Game Stats</button> <!-- // doesnt work  -->
+               <!--  <button href="#" class="restartGame" onclick="restartGame()">Restart Game</button>
+                <button href="#fourth_page" class="toTheStats" onclick="">View Game Stats</button> <!-- // doesnt work  --> -->
         </section>
         <section class="child" id="fourth_page">
             <div id="page-title">

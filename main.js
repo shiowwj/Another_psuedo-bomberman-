@@ -155,7 +155,7 @@ class Blocks {
 }
 
 class BomberMan {
-    constructor(game,sad){
+    constructor(game,x,y){
         //bomberman class creator function. Called by game start function to create object
         this.gameWidth = GAME_WIDTH;
         this.gameHeight = GAME_HEIGHT;
@@ -164,8 +164,8 @@ class BomberMan {
         this.radius = 25;
         //maxSpeed allows velocity of the object on canvas
         //Moves 9pixel (in any direction/frame refresh)
-        this.maxSpeedX = 9;
-        this.maxSpeedY = 9;
+        this.maxSpeedX = 20;
+        this.maxSpeedY = 20;
         this.speedX = 0;
         this.speedY = 0;
 
@@ -185,6 +185,8 @@ class BomberMan {
     //
     moveLeft(){
         this.speedX = -this.maxSpeedX;
+        // this.speedX = this.maxSpeedX*x;
+        // this.speedY = this.maxSpeedY*y;
     }
 
     moveRight(){
@@ -287,8 +289,8 @@ class BomberManTwo {
         this.gridHeight = GRID_HEIGHT;
         this.radius = 25;
 
-        this.maxSpeedX = 9;
-        this.maxSpeedY = 9;
+        this.maxSpeedX = 20;
+        this.maxSpeedY = 20;
         this.speedX = 0;
         this.speedY = 0;
 
@@ -476,7 +478,7 @@ class BombOne{
 
     update(deltaTime){
         //checks with game time to sequentially do bomb processing checks
-            let detonationTimer = 3; // status 0
+            let detonationTimer = 2; // status 0
             let timeToDet = this.timeCreated + detonationTimer; //status 0
             let timeOfExplode = timeToDet + 1.5; // change to status 1
             let timeToDisappear = timeOfExplode + 2;              // change to status 2
@@ -592,7 +594,7 @@ class BombTwo{ //Basically similar format with BombOne
 
     update(deltaTime){
          // checks gametimer with detonation time to do something
-            let detonationTimer = 3; // status 0 (base 3s)
+            let detonationTimer = 2; // status 0 (base 3s)
             let timeToDet = this.timeCreated + detonationTimer; //status 0
             let timeOfExplode = timeToDet + 1.5; // change to status 1 (base , 1.5s)
             let timeToDisappear = timeOfExplode + 2;              // change to status 2  .... this line.. really has no use....
